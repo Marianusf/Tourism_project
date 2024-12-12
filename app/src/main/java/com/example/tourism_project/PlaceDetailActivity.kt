@@ -1,67 +1,105 @@
 package com.example.tourism_project
 
-import android.annotation.SuppressLint
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberImagePainter
+import androidx.compose.ui.viewinterop.AndroidView
 import com.example.tourism_project.ui.theme.Tourism_ProjectTheme
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
+import org.osmdroid.util.GeoPoint
+//import org.osmdroid.views.tileproviders.TileSourceFactory
 
 class PlaceDetailActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            // Mengambil touristSpotId dari Intent
-            val touristSpotId = intent.getIntExtra("touristSpotId", -1)
 
-            // Cek apakah touristSpotId valid
-            if (touristSpotId != -1) {
-                PlaceDetail(touristSpotId = touristSpotId)
-            } else {
-                Text("Invalid touristSpotId")
+        val touristSpotId = intent.getIntExtra("touristSpotId", -1)
+
+        if (touristSpotId == -1) {
+            Toast.makeText(this, "Invalid tourist spot ID", Toast.LENGTH_SHORT).show()
+        } else {
+            setContent {
+                Tourism_ProjectTheme {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        // Gambar tempat wisata
+                        Image(
+                            painter = painterResource(id = R.drawable.merapi),  // Gunakan gambar yang sesuai
+                            contentDescription = "Gunung Merapi",
+                            modifier = Modifier.fillMaxWidth().height(200.dp),
+                            contentScale = ContentScale.Crop
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = "Detail Wisata")
+                        Text(text = "Deskripsi tempat wisata di Yogyakarta")
+
+                        // Peta akan dimuat di bawah ini
+                        PlaceDetailMap()
+                    }
+                }
             }
         }
     }
-}
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PlaceDetail(touristSpotId: Int) {
-    // Mendapatkan gambar tempat wisata berdasarkan touristSpotId
-    val imageRes = getImageForTouristSpot(touristSpotId)
+    @Composable
+    fun PlaceDetailScreen(touristSpotId: Int) {
+        Text(text = "Detail Tempat Wisata ID: $touristSpotId")
+    }
+    @Composable
+    fun PlaceDetailMap() {
+        // Menggunakan AndroidView untuk menampilkan MapView dari OSMDroid
+        AndroidView(
+            factory = { context ->
+                // Membuat dan mengonfigurasi MapView dari OSMDroid
+                val mapView = MapView(context)
+                mapView.setTileSource(TileSourceFactory.MAPNIK) // Pastikan ini berasal dari OSMDroid
+//                mapView.setZoomLevel(15)
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Place Detail") }
-            )
-        },
-        content = { padding ->
-            Column(modifier = Modifier.padding(padding)) {
-                Image(
-                    painter = rememberImagePainter(imageRes),
-                    contentDescription = "Tourist Spot Image",
-                    modifier = Modifier.fillMaxWidth().height(250.dp)
-                )
-                // Menampilkan detail lainnya
-                Text(text = "Tourist Spot ID: $touristSpotId")
-            }
-        }
-    )
-}
+                // Set lokasi default (misal: Gunung Merapi) di koordinat (-7.7583, 110.4257)
+                val location = GeoPoint(-7.7583, 110.4257)
+                mapView.controller.setCenter(location)
 
-fun getImageForTouristSpot(id: Int): Int {
-    return when (id) {
-        1 -> R.drawable.bromo
-        2 -> R.drawable.kuta
-        else -> R.drawable.ic_launcher_background
+                // Menambahkan Marker pada peta
+                val startMarker = Marker(mapView)
+                startMarker.position = location
+                startMarker.title = "Gunung Merapi"
+                mapView.overlays.add(startMarker)
+
+                mapView
+            },
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+
+    // Mengelola siklus hidup MapView
+    override fun onResume() {
+        super.onResume()
+        // Tidak perlu findViewById, karena kita sudah menggunakan AndroidView
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Sama seperti onResume(), karena kita menggunakan AndroidView, ini tidak perlu findViewById.
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Mengelola siklus hidup MapView jika perlu
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        // Mengelola memori jika aplikasi berjalan di perangkat dengan sumber daya terbatas
     }
 }

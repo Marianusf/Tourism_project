@@ -6,50 +6,66 @@ import android.database.sqlite.SQLiteOpenHelper
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
-    // Nama dan versi database
     companion object {
-        private const val DATABASE_NAME = "tourism_guide.db"
-        private const val DATABASE_VERSION = 1
+        const val DATABASE_NAME = "tourism.db"
+        const val DATABASE_VERSION = 1
 
-        const val TABLE_CATEGORIES = "categories"
-        const val TABLE_TOURIST_SPOTS = "tourist_spots"
+        // Tabel kategori
+        const val TABLE_CATEGORIES = "category"
+        const val COLUMN_ID = "id"
+        const val COLUMN_CATEGORY_NAME = "name"
+        const val COLUMN_IMAGE_RES = "image_res"
 
-        const val COLUMN_ID = "_id"
+        // Tabel tempat wisata
+        const val TABLE_TOURIST_SPOTS = "tourist_spot"
         const val COLUMN_NAME = "name"
         const val COLUMN_DESCRIPTION = "description"
-        const val COLUMN_CATEGORY_ID = "category_id" // ID kategori tempat wisata
-        const val COLUMN_IMAGE = "image" // Gambar (resource ID)
-        const val COLUMN_CATEGORY_NAME = "category_name" // Nama kategori
+        const val COLUMN_CATEGORY_ID = "category_id"
+
+        // Tabel favorit
+        const val TABLE_FAVORITES = "favorites"
+        const val COLUMN_TOURIST_SPOT_ID = "tourist_spot_id"
     }
 
-    // Membuat tabel pada saat database pertama kali dibuat
-    override fun onCreate(db: SQLiteDatabase?) {
+    override fun onCreate(db: SQLiteDatabase) {
+        // Buat tabel kategori
         val createCategoriesTable = """
             CREATE TABLE $TABLE_CATEGORIES (
                 $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                $COLUMN_CATEGORY_NAME TEXT NOT NULL
+                $COLUMN_CATEGORY_NAME TEXT NOT NULL,
+                $COLUMN_IMAGE_RES INTEGER NOT NULL
             )
-        """
+        """.trimIndent()
 
+        // Buat tabel tempat wisata
         val createTouristSpotsTable = """
             CREATE TABLE $TABLE_TOURIST_SPOTS (
                 $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 $COLUMN_NAME TEXT NOT NULL,
-                $COLUMN_DESCRIPTION TEXT,
-                $COLUMN_CATEGORY_ID INTEGER,
-                $COLUMN_IMAGE INTEGER,
-                FOREIGN KEY($COLUMN_CATEGORY_ID) REFERENCES $TABLE_CATEGORIES($COLUMN_ID)
+                $COLUMN_DESCRIPTION TEXT NOT NULL,
+                $COLUMN_CATEGORY_ID INTEGER NOT NULL,
+                $COLUMN_IMAGE_RES INTEGER NOT NULL,
+                FOREIGN KEY ($COLUMN_CATEGORY_ID) REFERENCES $TABLE_CATEGORIES($COLUMN_ID) ON DELETE CASCADE
             )
-        """
+        """.trimIndent()
 
-        db?.execSQL(createCategoriesTable)
-        db?.execSQL(createTouristSpotsTable)
+        // Buat tabel favorit
+        val createFavoritesTable = """
+            CREATE TABLE $TABLE_FAVORITES (
+                $COLUMN_TOURIST_SPOT_ID INTEGER PRIMARY KEY,
+                FOREIGN KEY ($COLUMN_TOURIST_SPOT_ID) REFERENCES $TABLE_TOURIST_SPOTS($COLUMN_ID) ON DELETE CASCADE
+            )
+        """.trimIndent()
+
+        db.execSQL(createCategoriesTable)
+        db.execSQL(createTouristSpotsTable)
+        db.execSQL(createFavoritesTable)
     }
 
-    // Upgrade database (jika diperlukan)
-    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        db?.execSQL("DROP TABLE IF EXISTS $TABLE_CATEGORIES")
-        db?.execSQL("DROP TABLE IF EXISTS $TABLE_TOURIST_SPOTS")
+    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_FAVORITES")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_TOURIST_SPOTS")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_CATEGORIES")
         onCreate(db)
     }
 }

@@ -5,5 +5,5 @@ data class TouristSpot(
     val name: String,
     val description: String,
     val categoryId: Int,
-    val image: Int // Resource ID untuk gambar
+    val imageRes: Int // Drawable resource ID
 )
