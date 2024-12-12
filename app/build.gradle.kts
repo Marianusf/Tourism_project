@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.tourism_project"
-        minSdk = 24
+        minSdk = 22
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -50,7 +50,11 @@ android {
 }
 
 dependencies {
-
+    implementation("io.coil-kt:coil-compose:2.1.0") // Untuk Coil dan Jetpack Compose
+    implementation("androidx.recyclerview:recyclerview:1.2.1") // Untuk RecyclerView
+    implementation("androidx.cardview:cardview:1.0.0")         // Untuk CardView
+    implementation("androidx.appcompat:appcompat:1.4.0")       // Untuk dukungan AppCompat
+    implementation("androidx.room:room-runtime:2.5.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
