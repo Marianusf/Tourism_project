@@ -8,8 +8,14 @@ espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.9.3"
 composeBom = "2024.04.01"
+google_maps = "17.0.1"
+coil_compose = "2.1.0"
+material3 = "1.0.0"
 
 [libraries]
+play_services_maps = { module = "com.google.android.gms:play-services-maps", version.ref = "google_maps" }
+coil_compose = { module = "io.coil-kt:coil-compose", version.ref = "coil_compose" }
+material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

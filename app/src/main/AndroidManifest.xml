@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Deklarasi izin yang diperlukan -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -12,17 +16,26 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Tourism_Project"
         tools:targetApi="31">
+
+        <!-- Aktivitas utama aplikasi -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
+            android:label="Tourism Yogyakarta"
             android:theme="@style/Theme.Tourism_Project">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
 
+        <!-- Aktivitas lainnya -->
+        <activity
+            android:name=".CategoryDetailActivity"
+            android:exported="true" />
+
+        <activity
+            android:name=".PlaceDetailActivity"
+            android:exported="true"/>
+    </application>
 </manifest>

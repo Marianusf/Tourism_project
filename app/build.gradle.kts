@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.tourism_project"
-        minSdk = 24
+        minSdk = 22
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -38,6 +38,7 @@ android {
     }
     buildFeatures {
         compose = true
+        viewBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -50,7 +51,16 @@ android {
 }
 
 dependencies {
-
+    implementation("io.coil-kt:coil-compose:2.1.0") // Untuk Coil dan Jetpack Compose
+    implementation("androidx.recyclerview:recyclerview:1.2.1") // Untuk RecyclerView
+    implementation("androidx.cardview:cardview:1.0.0")         // Untuk CardView
+    implementation("androidx.appcompat:appcompat:1.4.0")       // Untuk dukungan AppCompat
+    implementation("androidx.room:room-runtime:2.5.0")
+    implementation ("com.google.android.gms:play-services-maps:17.0.1")
+    // OSMDroid untuk OpenStreetMap
+    implementation ("androidx.compose.ui:ui:1.1.1")
+    implementation ("org.osmdroid:osmdroid-android:6.1.10")
+    implementation ("androidx.activity:activity-compose:1.3.1")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
