@@ -59,7 +59,7 @@ dependencies {
     implementation ("com.google.android.gms:play-services-maps:17.0.1")
     // OSMDroid untuk OpenStreetMap
     implementation ("androidx.compose.ui:ui:1.1.1")
-    implementation ("org.osmdroid:osmdroid-android:6.1.10")
+    implementation ("org.osmdroid:osmdroid-android:6.1.13")
     implementation ("androidx.activity:activity-compose:1.3.1")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
