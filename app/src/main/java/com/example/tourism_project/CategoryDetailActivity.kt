@@ -1,5 +1,6 @@
 package com.example.tourism_project
 
+import BottomNavigationBar
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -53,6 +54,9 @@ fun CategoryDetailScreen(categoryName: String, spots: List<TouristSpot>) {
     Scaffold(
         topBar = {
             TopAppBar(title = { Text(categoryName) })
+        },
+        bottomBar = {
+            BottomNavigationBar(currentScreen = "category") // Tandai layar aktif sebagai "category"
         }
     ) { padding ->
         LazyColumn(

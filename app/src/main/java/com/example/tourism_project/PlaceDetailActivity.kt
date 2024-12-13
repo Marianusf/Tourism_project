@@ -1,5 +1,6 @@
 package com.example.tourism_project
 
+import BottomNavigationBar
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -17,10 +18,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.tourism_project.ui.theme.Tourism_ProjectTheme
 
 class PlaceDetailActivity : ComponentActivity() {
@@ -64,6 +66,9 @@ fun PlaceDetailScreen(
                 title = { Text(placeName) },
                 colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color(0xFF3F51B5))
             )
+        },
+        bottomBar = {
+            BottomNavigationBar(currentScreen = "place") // Tandai layar aktif sebagai "place"
         }
     ) { padding ->
         Column(
@@ -130,7 +135,6 @@ fun PlaceDetailScreen(
                     context.startActivity(intent)
                 }
             )
-
         }
     }
 }
@@ -138,18 +142,19 @@ fun PlaceDetailScreen(
 @Composable
 fun ButtonWithIcon(
     text: String,
-    icon: ImageVector,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
     backgroundColor: Color,
     onClick: () -> Unit
 ) {
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
-        shape = RoundedCornerShape(12.dp),
-        modifier = Modifier.fillMaxWidth(0.5f)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
     ) {
-        Icon(imageVector = icon, contentDescription = null, tint = Color.White)
+        Icon(icon, contentDescription = null)
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text = text, color = Color.White)
+        Text(text = text, fontWeight = FontWeight.Bold, fontSize = 16.sp)
     }
 }

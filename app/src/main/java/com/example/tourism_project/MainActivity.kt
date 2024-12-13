@@ -1,5 +1,6 @@
 package com.example.tourism_project
 
+import BottomNavigationBar
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,12 +10,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -25,10 +22,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.tourism_project.models.Category
 import com.example.tourism_project.ui.theme.Tourism_ProjectTheme
 
@@ -37,8 +30,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             Tourism_ProjectTheme {
-                val navController = rememberNavController()
-                MainScreen(navController)
+                MainScreen()
             }
         }
     }
@@ -46,7 +38,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(navController: NavHostController) {
+fun MainScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -54,58 +46,33 @@ fun MainScreen(navController: NavHostController) {
                 colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
             )
         },
-        bottomBar = { BottomNavigationBar(navController) }
-    ) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = "home",
-            modifier = androidx.compose.ui.Modifier.padding(innerPadding)
-        ) {
-            composable("home") {
-                HomeScreen(navController)
-            }
-//            composable("category/{categoryId}/{categoryName}") { backStackEntry ->
-//                val categoryId = backStackEntry.arguments?.getString("categoryId")?.toIntOrNull() ?: -1
-//                val categoryName = backStackEntry.arguments?.getString("categoryName") ?: "Category"
-//                CategoryDetailScreen(categoryId,navController.toString(),categoryName)
-//            }
-            composable("about") {
-                AboutScreen()
-            }
+        bottomBar = {
+            BottomNavigationBar(currentScreen = "home") // Menandai layar aktif sebagai "home"
         }
-    }
-}
-@Composable
-fun AboutScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = "About Tourism App", style = MaterialTheme.typography.headlineMedium)
-    }
-}
-@Composable
-fun HomeScreen(navController: NavHostController) {
-    val context = LocalContext.current
-    val categories = listOf(
-        Category(1, "Wisata Alam", R.drawable.alam),
-        Category(2, "Wisata Pantai", R.drawable.pantai),
-        Category(3, "Wisata Sejarah", R.drawable.sejarah1)
-    )
+    ) { innerPadding ->
+        // Bagian Home
+        val context = LocalContext.current
+        val categories = listOf(
+            Category(1, "Wisata Alam", R.drawable.alam),
+            Category(2, "Wisata Pantai", R.drawable.pantai),
+            Category(3, "Wisata Sejarah", R.drawable.sejarah1)
+        )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        HeroImageSection()
-        categories.forEach { category ->
-            CategoryCard(category) {
-                val intent = Intent(context, CategoryDetailActivity::class.java)
-                intent.putExtra("categoryId", category.id)
-                intent.putExtra("categoryName", category.name)
-                context.startActivity(intent)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            HeroImageSection()
+            categories.forEach { category ->
+                CategoryCard(category) {
+                    val intent = Intent(context, CategoryDetailActivity::class.java)
+                    intent.putExtra("categoryId", category.id)
+                    intent.putExtra("categoryName", category.name)
+                    context.startActivity(intent)
+                }
             }
         }
     }
@@ -207,15 +174,5 @@ fun CategoryCard(category: Category, onClick: () -> Unit) {
                 )
             }
         }
-    }
-}
-
-@Composable
-fun CenteredText(text: String) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = text, style = MaterialTheme.typography.headlineMedium)
     }
 }
