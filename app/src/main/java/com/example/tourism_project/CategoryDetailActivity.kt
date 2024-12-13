@@ -62,12 +62,14 @@ fun CategoryDetailScreen(categoryName: String, spots: List<TouristSpot>) {
                 HeroSection(categoryName = categoryName)
             }
             items(spots) { spot ->
-                TouristSpotCard(spot = spot) { selectedSpot ->
-                    // Kirim data tempat wisata ke PlaceDetailActivity
+                TouristSpotCard(spot = spot) {
+                    // Intent ke PlaceDetailActivity
                     val intent = Intent(context, PlaceDetailActivity::class.java).apply {
-                        putExtra("placeName", selectedSpot.name)
-                        putExtra("latitude", selectedSpot.latitude)
-                        putExtra("longitude", selectedSpot.longitude)
+                        putExtra("placeName", spot.name)
+                        putExtra("description", spot.description)
+                        putExtra("imageRes", spot.imageRes)
+                        putExtra("latitude", spot.latitude)
+                        putExtra("longitude", spot.longitude)
                     }
                     context.startActivity(intent)
                 }

@@ -1,201 +1,155 @@
 package com.example.tourism_project
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Directions
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import com.example.tourism_project.RouteHelper.fetchRoute
 import com.example.tourism_project.ui.theme.Tourism_ProjectTheme
-import kotlinx.coroutines.*
-import org.osmdroid.config.Configuration
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
-import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.Marker
-import org.osmdroid.views.overlay.Polyline
-import java.io.File
 
 class PlaceDetailActivity : ComponentActivity() {
-
-    private lateinit var mapView: MapView
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Konfigurasi OSMDroid
-        val config = Configuration.getInstance()
-        config.userAgentValue = packageName
-        config.osmdroidBasePath = File(cacheDir, "osmdroid")
-        config.osmdroidTileCache = File(cacheDir, "osmdroid/tiles")
+        val placeName = intent.getStringExtra("placeName") ?: "Detail Tempat"
+        val description = intent.getStringExtra("description") ?: "Deskripsi tidak tersedia"
+        val imageRes = intent.getIntExtra("imageRes", R.drawable.bakpia)
+        val latitude = intent.getDoubleExtra("latitude", 0.0)
+        val longitude = intent.getDoubleExtra("longitude", 0.0)
+
         setContent {
             Tourism_ProjectTheme {
-                val placeName = intent.getStringExtra("placeName") ?: "Tempat Wisata"
-                val latitude = intent.getDoubleExtra("latitude", 0.0)
-                val longitude = intent.getDoubleExtra("longitude", 0.0)
-                val destinationLocation = GeoPoint(latitude, longitude)
-
-                PlaceDetailScreen(placeName = placeName, destinationLocation = destinationLocation)
+                PlaceDetailScreen(
+                    placeName = placeName,
+                    description = description,
+                    imageRes = imageRes,
+                    latitude = latitude,
+                    longitude = longitude
+                )
             }
         }
-
     }
+}
 
-    @Composable
-    fun PlaceDetailScreen(placeName: String, destinationLocation: GeoPoint) {
-        var showMap by remember { mutableStateOf(false) }
-        var showRoute by remember { mutableStateOf(false) }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PlaceDetailScreen(
+    placeName: String,
+    description: String,
+    imageRes: Int,
+    latitude: Double,
+    longitude: Double
+) {
+    val context = LocalContext.current
 
-        // Lokasi awal (contoh: Malioboro, Yogyakarta)
-        val startLocation = GeoPoint(-7.7956, 110.3695)
-
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(placeName) },
+                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color(0xFF3F51B5))
+            )
+        }
+    ) { padding ->
         Column(
             modifier = Modifier
+                .padding(padding)
                 .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = placeName,
-                style = MaterialTheme.typography.headlineMedium,
-                color = Color(0xFF6200EE)
+            // Gambar Utama
+            Image(
+                painter = painterResource(id = imageRes),
+                contentDescription = placeName,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Rute menuju $placeName",
-                style = MaterialTheme.typography.bodyLarge
-            )
+
             Spacer(modifier = Modifier.height(16.dp))
-            CustomButton(
+
+            // Deskripsi
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .background(Color.White, shape = RoundedCornerShape(8.dp))
+                    .padding(16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Tombol Navigasi
+            ButtonWithIcon(
                 text = "Lihat Maps",
                 icon = Icons.Filled.Map,
                 backgroundColor = Color(0xFF03A9F4),
                 onClick = {
-                    showMap = true
-                    showRoute = false
+                    if (latitude != 0.0 && longitude != 0.0) {
+                        val intent = Intent(context, MapActivity::class.java).apply {
+                            putExtra("placeName", placeName)
+                            putExtra("latitude", latitude)
+                            putExtra("longitude", longitude)
+                            putExtra("showRoute", false) // Maps Only
+                        }
+                        context.startActivity(intent)
+                    } else {
+                        Toast.makeText(context, "Lokasi tidak valid!", Toast.LENGTH_SHORT).show()
+                    }
                 }
             )
+
             Spacer(modifier = Modifier.height(8.dp))
-            CustomButton(
+
+            ButtonWithIcon(
                 text = "Lihat Rute",
                 icon = Icons.Filled.Directions,
                 backgroundColor = Color(0xFF4CAF50),
                 onClick = {
-                    showRoute = true
-                    showMap = false
+                    val intent = Intent(context, MapActivity::class.java).apply {
+                        putExtra("placeName", placeName)
+                        putExtra("latitude", latitude)
+                        putExtra("longitude", longitude)
+                        putExtra("action", "route") // Aksi "Lihat Rute"
+                    }
+                    context.startActivity(intent)
                 }
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            if (showMap) {
-                MapViewWithMarker(destinationLocation)
-            }
-            if (showRoute) {
-                MapViewWithRoute(startLocation, destinationLocation)
-            }
+
         }
     }
+}
 
-
-    @Composable
-    fun MapViewWithMarker(destination: GeoPoint) {
-        AndroidView(
-            factory = { context ->
-                mapView = MapView(context)
-                mapView.setTileSource(TileSourceFactory.MAPNIK)
-
-                // Tambahkan marker untuk tujuan
-                addMarker(mapView, destination, "Gunung Merapi")
-                mapView.controller.setCenter(destination)
-                mapView.controller.setZoom(13.0)
-
-                mapView
-            },
-            modifier = Modifier.fillMaxSize()
-        )
-    }
-
-    @Composable
-    fun MapViewWithRoute(start: GeoPoint, destination: GeoPoint) {
-        AndroidView(
-            factory = { context ->
-                mapView = MapView(context)
-                mapView.setTileSource(TileSourceFactory.MAPNIK)
-
-                // Tambahkan marker untuk lokasi awal
-                addMarker(mapView, start, "Lokasi Awal: Malioboro")
-
-                // Tambahkan marker untuk tujuan
-                addMarker(mapView, destination, "Tujuan: Gunung Merapi")
-
-                // Fokuskan peta pada lokasi awal
-                mapView.controller.setCenter(start)
-                mapView.controller.setZoom(13.0)
-
-                // Hitung dan gambar rute
-                CoroutineScope(Dispatchers.IO).launch {
-                    val route = fetchRoute(start, destination)
-                    withContext(Dispatchers.Main) {
-                        if (route.isNotEmpty()) {
-                            drawRoute(mapView, route)
-                            Toast.makeText(context, "Rute berhasil dimuat.", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(context, "Gagal memuat rute.", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-
-                mapView
-            },
-            modifier = Modifier.fillMaxSize()
-        )
-    }
-
-    @Composable
-    fun CustomButton(
-        text: String,
-        icon: ImageVector,
-        backgroundColor: Color,
-        onClick: () -> Unit
+@Composable
+fun ButtonWithIcon(
+    text: String,
+    icon: ImageVector,
+    backgroundColor: Color,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier.fillMaxWidth(0.5f)
     ) {
-        Button(
-            onClick = onClick,
-            colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(imageVector = icon, contentDescription = null, tint = Color.White)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = text, color = Color.White)
-        }
-    }
-
-    private fun addMarker(mapView: MapView, location: GeoPoint, title: String) {
-        val marker = Marker(mapView)
-        marker.position = location
-        marker.title = title
-        mapView.overlays.add(marker)
-    }
-
-    private fun drawRoute(mapView: MapView, route: List<GeoPoint>) {
-        val polyline = Polyline()
-        polyline.setPoints(route)
-        polyline.color = android.graphics.Color.BLUE
-        polyline.width = 8.0f
-        mapView.overlays.add(polyline)
-        mapView.invalidate() // Refresh peta
+        Icon(imageVector = icon, contentDescription = null, tint = Color.White)
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = text, color = Color.White)
     }
 }
