@@ -206,4 +206,5 @@ class PlaceDetailActivity : ComponentActivity() {
         mapView.overlays.add(polyline)
         mapView.invalidate() // Refresh peta
     }
+
 }
