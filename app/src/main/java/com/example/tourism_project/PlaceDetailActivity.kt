@@ -42,23 +42,26 @@ class PlaceDetailActivity : ComponentActivity() {
         config.userAgentValue = packageName
         config.osmdroidBasePath = File(cacheDir, "osmdroid")
         config.osmdroidTileCache = File(cacheDir, "osmdroid/tiles")
-
         setContent {
             Tourism_ProjectTheme {
-                PlaceDetailScreen()
+                val placeName = intent.getStringExtra("placeName") ?: "Tempat Wisata"
+                val latitude = intent.getDoubleExtra("latitude", 0.0)
+                val longitude = intent.getDoubleExtra("longitude", 0.0)
+                val destinationLocation = GeoPoint(latitude, longitude)
+
+                PlaceDetailScreen(placeName = placeName, destinationLocation = destinationLocation)
             }
         }
+
     }
 
     @Composable
-    fun PlaceDetailScreen() {
-        // State untuk mengontrol apakah peta atau rute ditampilkan
+    fun PlaceDetailScreen(placeName: String, destinationLocation: GeoPoint) {
         var showMap by remember { mutableStateOf(false) }
         var showRoute by remember { mutableStateOf(false) }
 
-        // Lokasi awal dan tujuan (statis)
-        val startLocation = GeoPoint(-7.7956, 110.3695) // Malioboro
-        val destinationLocation = GeoPoint(-7.7583, 110.4257) // Gunung Merapi
+        // Lokasi awal (contoh: Malioboro, Yogyakarta)
+        val startLocation = GeoPoint(-7.7956, 110.3695)
 
         Column(
             modifier = Modifier
@@ -66,21 +69,17 @@ class PlaceDetailActivity : ComponentActivity() {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Informasi detail tempat wisata
             Text(
-                text = "Gunung Merapi",
+                text = placeName,
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color(0xFF6200EE)
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Gunung berapi yang terkenal di Yogyakarta.",
+                text = "Rute menuju $placeName",
                 style = MaterialTheme.typography.bodyLarge
             )
-
             Spacer(modifier = Modifier.height(16.dp))
-
-            // Tombol untuk melihat peta
             CustomButton(
                 text = "Lihat Maps",
                 icon = Icons.Filled.Map,
@@ -90,10 +89,7 @@ class PlaceDetailActivity : ComponentActivity() {
                     showRoute = false
                 }
             )
-
             Spacer(modifier = Modifier.height(8.dp))
-
-            // Tombol untuk melihat rute
             CustomButton(
                 text = "Lihat Rute",
                 icon = Icons.Filled.Directions,
@@ -103,20 +99,16 @@ class PlaceDetailActivity : ComponentActivity() {
                     showMap = false
                 }
             )
-
             Spacer(modifier = Modifier.height(16.dp))
-
-            // Menampilkan peta jika tombol "Lihat Maps" diklik
             if (showMap) {
                 MapViewWithMarker(destinationLocation)
             }
-
-            // Menampilkan rute jika tombol "Lihat Rute" diklik
             if (showRoute) {
                 MapViewWithRoute(startLocation, destinationLocation)
             }
         }
     }
+
 
     @Composable
     fun MapViewWithMarker(destination: GeoPoint) {
@@ -206,5 +198,4 @@ class PlaceDetailActivity : ComponentActivity() {
         mapView.overlays.add(polyline)
         mapView.invalidate() // Refresh peta
     }
-
 }

@@ -22,7 +22,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.tourism_project.models.TouristSpot
 import com.example.tourism_project.ui.theme.Tourism_ProjectTheme
 
@@ -53,35 +52,24 @@ fun CategoryDetailScreen(categoryName: String, spots: List<TouristSpot>) {
     val context = LocalContext.current
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(categoryName) },
-                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
-            )
+            TopAppBar(title = { Text(categoryName) })
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier.padding(padding)
         ) {
-            // Hero Section
-            HeroSection(categoryName)
-
-            // List tempat wisata
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(spots) { spot ->
-                    TouristSpotCard(spot) {
-                        // Navigasi ke PlaceDetailActivity
-                        val intent = Intent(context, PlaceDetailActivity::class.java)
-                        intent.putExtra("spotName", spot.name)
-                        intent.putExtra("spotDescription", spot.description)
-                        context.startActivity(intent)
+            item {
+                HeroSection(categoryName = categoryName)
+            }
+            items(spots) { spot ->
+                TouristSpotCard(spot = spot) { selectedSpot ->
+                    // Kirim data tempat wisata ke PlaceDetailActivity
+                    val intent = Intent(context, PlaceDetailActivity::class.java).apply {
+                        putExtra("placeName", selectedSpot.name)
+                        putExtra("latitude", selectedSpot.latitude)
+                        putExtra("longitude", selectedSpot.longitude)
                     }
+                    context.startActivity(intent)
                 }
             }
         }
@@ -116,34 +104,23 @@ fun HeroSection(categoryName: String) {
 }
 
 @Composable
-fun TouristSpotCard(spot: TouristSpot, onClick: () -> Unit) {
+fun TouristSpotCard(spot: TouristSpot, onClick: (TouristSpot) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(6.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            .padding(8.dp)
+            .clickable { onClick(spot) },
+        shape = RoundedCornerShape(16.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Gambar tempat wisata
+        Row(modifier = Modifier.padding(16.dp)) {
             Image(
                 painter = painterResource(id = spot.imageRes),
                 contentDescription = spot.name,
-                modifier = Modifier
-                    .size(80.dp)
-                    .padding(end = 16.dp),
+                modifier = Modifier.size(80.dp),
                 contentScale = ContentScale.Crop
             )
-            // Detail tempat wisata
-            Column(
-                verticalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxHeight()
-            ) {
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
                 Text(
                     text = spot.name,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
@@ -162,18 +139,59 @@ fun TouristSpotCard(spot: TouristSpot, onClick: () -> Unit) {
 fun getTouristSpotsByCategory(categoryId: Int): List<TouristSpot> {
     return when (categoryId) {
         1 -> listOf(
-            TouristSpot(1, "Gunung Merapi", "Gunung berapi aktif yang terkenal", 1, R.drawable.merapi),
-            TouristSpot(2, "Bukit Bintang", "Pemandangan malam indah", 1, R.drawable.bakpia)
+            TouristSpot(
+                1,
+                "Gunung Merapi",
+                "Gunung aktif di Yogyakarta",
+                -7.5407,
+                110.4428,
+                R.drawable.merapi,
+            ),
+            TouristSpot(
+                2,
+                "Bukit Bintang",
+                "Pemandangan malam indah",
+                -7.8482,
+                110.4773,
+                R.drawable.alam,
+            )
         )
         2 -> listOf(
-            TouristSpot(3, "Pantai Parangtritis", "Pantai terkenal di Yogyakarta", 2, R.drawable.parangtritis),
-            TouristSpot(4, "Pantai Indrayanti", "Pantai pasir putih yang cantik", 2, R.drawable.parangtritis)
+            TouristSpot(
+                3,
+                "Pantai Parangtritis",
+                "Pantai terkenal di Yogyakarta",
+                -8.0211,
+                110.2872,
+                R.drawable.pantai,
+            ),
+            TouristSpot(
+                4,
+                "Pantai Indrayanti",
+                "Pantai pasir putih",
+                -8.1501,
+                110.6133,
+                R.drawable.pantai,
+            )
         )
         3 -> listOf(
-            TouristSpot(5, "Candi Borobudur", "Candi Budha terbesar di dunia", 3, R.drawable.borobudur),
-            TouristSpot(6, "Keraton Yogyakarta", "Pusat kerajaan Yogyakarta", 3, R.drawable.keraton)
+            TouristSpot(
+                5,
+                "Candi Borobudur",
+                "Candi Budha terbesar",
+                -7.6079,
+                110.2038,
+                R.drawable.borobudur,
+            ),
+            TouristSpot(
+                6,
+                "Candi Prambanan",
+                "Candi Hindu megah",
+                -7.7518,
+                110.4918,
+                R.drawable.prambanan,
+            )
         )
         else -> emptyList()
     }
 }
-
