@@ -13,9 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.example.tourism_project.RouteHelper.fetchRoute
 import com.example.tourism_project.ui.theme.Tourism_ProjectTheme
-import kotlinx.coroutines.*
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -42,21 +40,60 @@ class MapActivity : ComponentActivity() {
                 val placeName = intent.getStringExtra("placeName") ?: "Lokasi"
                 val latitude = intent.getDoubleExtra("latitude", 0.0)
                 val longitude = intent.getDoubleExtra("longitude", 0.0)
+                val action = intent.getStringExtra("action") ?: "view"
 
                 if (latitude == 0.0 && longitude == 0.0) {
                     Toast.makeText(this, "Lokasi tidak valid", Toast.LENGTH_SHORT).show()
                     finish()
                 } else {
                     val destination = GeoPoint(latitude, longitude)
-                    MapScreen(placeName, destination)
+                    if (action == "route") {
+                        MapScreenWithRoute(placeName, destination)
+                    } else {
+                        MapScreenViewOnly(placeName, destination)
+                    }
                 }
             }
         }
     }
 
     @Composable
-    fun MapScreen(placeName: String, destination: GeoPoint) {
-        val startLocation = GeoPoint(-7.7956, 110.3695) // Contoh: Malioboro
+    fun MapScreenViewOnly(placeName: String, destination: GeoPoint) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = placeName,
+                style = MaterialTheme.typography.headlineMedium,
+                color = Color(0xFF6200EE)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            AndroidView(
+                factory = { context ->
+                    mapView = MapView(context)
+                    mapView.setTileSource(TileSourceFactory.MAPNIK)
+                    mapView.controller.setZoom(15.0)
+                    mapView.controller.setCenter(destination)
+
+                    // Tambahkan marker pada lokasi tujuan
+                    addMarker(mapView, destination, placeName)
+
+                    mapView
+                },
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            )
+        }
+    }
+
+    @Composable
+    fun MapScreenWithRoute(placeName: String, destination: GeoPoint) {
+        val startLocation = GeoPoint(-7.754944962569629, 110.42132957116411) // Contoh: Malioboro
         var totalDistance by remember { mutableStateOf(0.0) }
 
         Column(
@@ -81,29 +118,27 @@ class MapActivity : ComponentActivity() {
                 factory = { context ->
                     mapView = MapView(context)
                     mapView.setTileSource(TileSourceFactory.MAPNIK)
-                    mapView.controller.setZoom(13.0)
+                    mapView.controller.setZoom(15.0)
                     mapView.controller.setCenter(startLocation)
 
                     // Tambahkan marker
                     addMarker(mapView, startLocation, "Lokasi Awal")
                     addMarker(mapView, destination, placeName)
 
-                    // Gambar rute
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val route = fetchRoute(startLocation, destination)
-                        withContext(Dispatchers.Main) {
-                            if (route.isNotEmpty()) {
-                                drawRoute(mapView, route)
-                                totalDistance = calculateTotalDistance(route)
-                            } else {
-                                Toast.makeText(context, "Gagal memuat rute", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    }
+
+                    val hardcodedRoute = listOf(
+                        startLocation,
+                        GeoPoint(-7.8000, 110.3800),
+                        GeoPoint(-7.8050, 110.4000),
+                        destination
+                    )
+                    drawRoute(mapView, hardcodedRoute)
+                    totalDistance = calculateTotalDistance(hardcodedRoute)
+
                     mapView
                 },
                 modifier = Modifier
-                    .weight(1f) // Membuat peta menyesuaikan tinggi
+                    .weight(1f)
                     .fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -139,7 +174,7 @@ class MapActivity : ComponentActivity() {
         polyline.color = android.graphics.Color.BLUE
         polyline.width = 8.0f
         mapView.overlays.add(polyline)
-        mapView.invalidate() // Refresh peta
+        mapView.invalidate()
     }
 
     private fun calculateTotalDistance(route: List<GeoPoint>): Double {

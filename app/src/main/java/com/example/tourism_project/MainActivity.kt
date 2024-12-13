@@ -50,7 +50,6 @@ fun MainScreen() {
             BottomNavigationBar(currentScreen = "home") // Menandai layar aktif sebagai "home"
         }
     ) { innerPadding ->
-        // Bagian Home
         val context = LocalContext.current
         val categories = listOf(
             Category(1, "Wisata Alam", R.drawable.alam),
@@ -113,16 +112,16 @@ fun HeroImageSection() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Selamat Datang di Tourism App",
+                    text = "Selamat Datang di Jogjakarta Destination",
                     style = MaterialTheme.typography.headlineSmall.copy(
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = Color.Yellow
                     ),
-                    fontSize = 20.sp
+                    fontSize = 22.sp
                 )
                 Text(
-                    text = "Jelajahi keindahan alam, pantai, dan sejarah",
-                    style = MaterialTheme.typography.bodyMedium.copy(color = Color.White)
+                    text = "Jelajahi keindahan alam, pantai, dan sejarah happy holiday!",
+                    style = MaterialTheme.typography.bodyMedium.copy(color = Color.Black)
                 )
             }
         }

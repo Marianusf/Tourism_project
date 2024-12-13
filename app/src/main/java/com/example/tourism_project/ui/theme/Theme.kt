@@ -28,7 +28,6 @@ private val DarkColors = darkColorScheme(
     onBackground = Color.White
 )
 
-// Tipografi
 val AppTypography = Typography(
     headlineLarge = TextStyle(
         fontWeight = FontWeight.Bold,
@@ -42,7 +41,6 @@ val AppTypography = Typography(
     )
 )
 
-// Bentuk Komponen
 val AppShapes = Shapes(
     small = RoundedCornerShape(8.dp),
     medium = RoundedCornerShape(16.dp),
@@ -51,7 +49,7 @@ val AppShapes = Shapes(
 
 @Composable
 fun Tourism_ProjectTheme(
-    darkTheme: Boolean = false, // Berubah sesuai pengaturan sistem
+    darkTheme: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colors = if (darkTheme) DarkColors else LightColors

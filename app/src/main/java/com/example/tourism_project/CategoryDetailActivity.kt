@@ -33,7 +33,7 @@ class CategoryDetailActivity : ComponentActivity() {
         val categoryName = intent.getStringExtra("categoryName") ?: "Detail"
 
         if (categoryId == -1) {
-            finish() // Jika ID tidak valid, keluar dari layar
+            finish()
         } else {
             setContent {
                 Tourism_ProjectTheme {
@@ -56,7 +56,7 @@ fun CategoryDetailScreen(categoryName: String, spots: List<TouristSpot>) {
             TopAppBar(title = { Text(categoryName) })
         },
         bottomBar = {
-            BottomNavigationBar(currentScreen = "category") // Tandai layar aktif sebagai "category"
+            BottomNavigationBar(currentScreen = "category")
         }
     ) { padding ->
         LazyColumn(
@@ -71,9 +71,9 @@ fun CategoryDetailScreen(categoryName: String, spots: List<TouristSpot>) {
                     val intent = Intent(context, PlaceDetailActivity::class.java).apply {
                         putExtra("placeName", spot.name)
                         putExtra("description", spot.description)
-                        putExtra("imageRes", spot.imageRes)
                         putExtra("latitude", spot.latitude)
                         putExtra("longitude", spot.longitude)
+                        putExtra("imageRes", spot.imageRes)
                     }
                     context.startActivity(intent)
                 }
@@ -141,7 +141,6 @@ fun TouristSpotCard(spot: TouristSpot, onClick: (TouristSpot) -> Unit) {
         }
     }
 }
-
 fun getTouristSpotsByCategory(categoryId: Int): List<TouristSpot> {
     return when (categoryId) {
         1 -> listOf(
@@ -156,48 +155,97 @@ fun getTouristSpotsByCategory(categoryId: Int): List<TouristSpot> {
             TouristSpot(
                 2,
                 "Bukit Bintang",
-                "Pemandangan malam indah",
+                "Pemandangan malam indah nikmati keasrian malam ",
                 -7.8482,
                 110.4773,
-                R.drawable.alam,
+                R.drawable.bukitbintang,
+            ),
+            TouristSpot(
+                3,
+                "Bunker Kaliadem",
+                "Bunker dengan pemandangan Gunung Merapi dan nikmati jeep disini",
+                -7.5942,
+                110.4461,
+                R.drawable.bunkerkaliadem,
+            ),
+            TouristSpot(
+                4,
+                "Kaliurang",
+                "Kawasan wisata pegunungan yang sejuk dan asri!",
+                -7.6000,
+                110.4244,
+                R.drawable.kaliurang,
             )
         )
         2 -> listOf(
             TouristSpot(
-                3,
+                5,
                 "Pantai Parangtritis",
-                "Pantai terkenal di Yogyakarta",
+                "Pantai terkenal di Yogyakarta dengan pasir hitamnya ",
                 -8.0211,
                 110.2872,
-                R.drawable.pantai,
+                R.drawable.parangtrities,
             ),
             TouristSpot(
-                4,
+                6,
                 "Pantai Indrayanti",
-                "Pantai pasir putih",
+                "Pantai pasir putih yang menawan, dapat dinikmati bersama teman, pacar atau kerabat anda!",
                 -8.1501,
                 110.6133,
-                R.drawable.pantai,
+                R.drawable.pantai_indrayanti,
+            ),
+            TouristSpot(
+                7,
+                "Pantai Drini",
+                "Pantai dengan pulau karang dan keindahan karangnya",
+                -8.1376,
+                110.5719,
+                R.drawable.pantai_drini,
+            ),
+            TouristSpot(
+                8,
+                "Pantai Ngobaran nikmati pasir putih indah di Jogja",
+                "Pantai dengan nuansa budaya",
+                -8.1289,
+                110.5480,
+                R.drawable.pantai_ngobaran,
             )
         )
         3 -> listOf(
             TouristSpot(
-                5,
+                9,
                 "Candi Borobudur",
-                "Candi Budha terbesar",
+                "Candi Buddha terbesar di Indonesia, dan masuk sebagai keajaiban dunia",
                 -7.6079,
                 110.2038,
                 R.drawable.borobudur,
             ),
             TouristSpot(
-                6,
+                10,
                 "Candi Prambanan",
-                "Candi Hindu megah",
+                "Candi Hindu yang megah memiliki ribuan sejarah unik",
                 -7.7518,
                 110.4918,
                 R.drawable.prambanan,
+            ),
+            TouristSpot(
+                11,
+                "Candi Ratu Boko",
+                "Situs istana kuno tentang perjalanan panjang",
+                -7.7707,
+                110.4891,
+                R.drawable.ratu_boko,
+            ),
+            TouristSpot(
+                12,
+                "Candi Plaosan",
+                "Candi kembar dengan arsitektur unik yang dapat dinikmati bersama saudara anda",
+                -7.7428,
+                110.5021,
+                R.drawable.candi_plaosan,
             )
         )
         else -> emptyList()
     }
 }
+
