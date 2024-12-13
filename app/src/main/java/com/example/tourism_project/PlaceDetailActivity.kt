@@ -130,7 +130,10 @@ fun PlaceDetailScreen(
                         putExtra("placeName", placeName)
                         putExtra("latitude", latitude)
                         putExtra("longitude", longitude)
-                        putExtra("action", "route") // Aksi "Lihat Rute"
+                        putExtra(
+                            "action",
+                            "route"
+                        )
                     }
                     context.startActivity(intent)
                 }

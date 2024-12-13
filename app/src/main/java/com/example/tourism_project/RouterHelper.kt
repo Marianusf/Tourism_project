@@ -1,10 +1,9 @@
-package com.example.tourism_project
-
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.osmdroid.util.GeoPoint
 import java.net.URL
+
 object RouteHelper {
     suspend fun fetchRoute(start: GeoPoint, end: GeoPoint): List<GeoPoint> {
         val url = "https://router.project-osrm.org/route/v1/driving/" +
@@ -20,13 +19,14 @@ object RouteHelper {
                 val jsonObject = JSONObject(response)
                 val routes = jsonObject.optJSONArray("routes")
                 if (routes == null || routes.length() == 0) {
-                    println("Tidak ada rute ditemukan.")
+                    println("Tidak ada rute ditemukan atau respons kosong.")
                     return@withContext emptyList()
                 }
 
                 val coordinates = routes.getJSONObject(0)
                     .getJSONObject("geometry")
                     .getJSONArray("coordinates")
+                println("Jumlah koordinat dalam rute: ${coordinates.length()}")
 
                 val geoPoints = mutableListOf<GeoPoint>()
                 for (i in 0 until coordinates.length()) {
@@ -35,6 +35,7 @@ object RouteHelper {
                     val lat = coord.getDouble(1)
                     geoPoints.add(GeoPoint(lat, lon))
                 }
+                println("Berhasil memuat ${geoPoints.size} titik GeoPoint.")
                 geoPoints
             } catch (e: Exception) {
                 e.printStackTrace()
