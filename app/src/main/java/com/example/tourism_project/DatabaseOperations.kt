@@ -44,7 +44,8 @@ class DatabaseOperations(context: Context) {
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 val id = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.COLUMN_ID))
-                val name = cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_CATEGORY_NAME))
+                val name =
+                    cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_CATEGORY_NAME))
                 val imageRes = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.COLUMN_IMAGE_RES))
                 categories.add(Category(id, name, imageRes))
             } while (cursor.moveToNext())
@@ -64,50 +65,59 @@ class DatabaseOperations(context: Context) {
         )
 
         val touristSpots = mutableListOf<TouristSpot>()
-        if (cursor != null && cursor.moveToFirst()) {
+        if (cursor.use { it.moveToFirst() }) {
             do {
-                val id = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.COLUMN_ID))
-                val name = cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_NAME))
-                val description = cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_DESCRIPTION))
-                val imageRes = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.COLUMN_IMAGE_RES))
-                touristSpots.add(TouristSpot(id, name, description, categoryId, imageRes))
+                val id = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_ID))
+                val name =
+                    cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_NAME))
+                val description =
+                    cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_DESCRIPTION))
+                val imageRes =
+                    cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_IMAGE_RES))
+
+                touristSpots.add(TouristSpot(id, name, description, latitude = 0.0, longitude = 0.0, categoryId))
             } while (cursor.moveToNext())
         }
-
-        cursor.close()
         return touristSpots
+
     }
 
-    // Tambah tempat wisata ke favorit
+
+        // Tambah favorit
     fun addFavorite(touristSpotId: Int) {
         val db: SQLiteDatabase = dbHelper.writableDatabase
-        val values = ContentValues().apply {
-            put(DatabaseHelper.COLUMN_TOURIST_SPOT_ID, touristSpotId)
+        try {
+            val values = ContentValues().apply {
+                put(DatabaseHelper.COLUMN_TOURIST_SPOT_ID, touristSpotId)
+            }
+            db.insert(DatabaseHelper.TABLE_FAVORITES, null, values)
+        } finally {
+            db.close()
         }
-        db.insert(DatabaseHelper.TABLE_FAVORITES, null, values)
     }
 
     // Ambil semua favorit
     @SuppressLint("Range")
     fun getFavorites(): List<TouristSpot> {
         val db: SQLiteDatabase = dbHelper.readableDatabase
-        val cursor: Cursor = db.rawQuery(
+        val cursor = db.rawQuery(
             "SELECT * FROM ${DatabaseHelper.TABLE_TOURIST_SPOTS} WHERE ${DatabaseHelper.COLUMN_ID} IN (SELECT ${DatabaseHelper.COLUMN_TOURIST_SPOT_ID} FROM ${DatabaseHelper.TABLE_FAVORITES})",
             null
         )
 
-        val favorites = mutableListOf<TouristSpot>()
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                val id = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.COLUMN_ID))
-                val name = cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_NAME))
-                val description = cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_DESCRIPTION))
-                val imageRes = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.COLUMN_IMAGE_RES))
-                favorites.add(TouristSpot(id, name, description, 0, imageRes))
-            } while (cursor.moveToNext())
+        return cursor.use {
+            val favorites = mutableListOf<TouristSpot>()
+            if (it.moveToFirst()) {
+                do {
+                    val id = it.getInt(it.getColumnIndexOrThrow(DatabaseHelper.COLUMN_ID))
+                    val name = it.getString(it.getColumnIndexOrThrow(DatabaseHelper.COLUMN_NAME))
+                    val description = it.getString(it.getColumnIndexOrThrow(DatabaseHelper.COLUMN_DESCRIPTION))
+                    val imageRes = it.getInt(it.getColumnIndexOrThrow(DatabaseHelper.COLUMN_IMAGE_RES))
+                    favorites.add(TouristSpot(id, name, description, 0.0, 0.0, imageRes)) // tambahkan latitude & longitude jika ada
+                } while (it.moveToNext())
+            }
+            favorites
         }
 
-        cursor.close()
-        return favorites
     }
 }
